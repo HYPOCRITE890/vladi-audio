@@ -183,12 +183,7 @@ async function createBooking(data) {
 
     loadAdminData(); // refresh
 }
-createBooking({
-    username: "john",
-    name: "Wedding Package",
-    booking_date: "2026-05-01",
-    price: 15000
-});
+
 // Update
 async function updateBooking(id, value, field) {
     await fetch(`/api/admin/update-booking/${id}`, {
@@ -201,11 +196,19 @@ async function updateBooking(id, value, field) {
 async function deleteBooking(id) {
     if (!confirm("Delete this booking?")) return;
 
-    await fetch(`/api/admin/delete-booking/${id}`, {
+    const res = await fetch(`/api/admin/delete-booking/${id}`, {
         method: 'DELETE'
     });
 
-    loadAdminData(); // refresh
+    if (!res.ok) {
+        const text = await res.text();
+        console.error("Delete failed:", text);
+        alert("Delete failed!");
+        return;
+    }
+
+    console.log("Deleted:", id);
+    loadAdminData();
 }
 // Admin View: Load All Bookings & Stats
 async function loadAdminData() {
