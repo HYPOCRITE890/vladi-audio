@@ -157,6 +157,19 @@ app.get('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true });
 });
+// delete
+app.delete('/api/admin/delete-booking/:id', async (req, res) => {
+    if (req.session.role !== 'admin') {
+        return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Delete failed" });
+    }
+});
 
 // --- SERVER START ---
 const PORT = process.env.PORT || 3000;
