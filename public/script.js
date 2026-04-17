@@ -90,23 +90,64 @@ async function loadCategory(cat) {
 
 // Booking Handler - Updated for MongoDB _id
 async function bookItem(mongoId) {
-    if (!currentUser) return alert("Please login first!");
+    if (!currentUser) {
+        alert("Please login first!");
+        return;
+    }
+
+    if (!mongoId || typeof mongoId !== "string") {
+        alert("Invalid item selected.");
+        return;
+    }
+
     const dateInput = document.getElementById(`date-${mongoId}`);
+
+    if (!dateInput) {
+        alert("Date input not found.");
+        return;
+    }
+
     const date = dateInput.value;
-    
-    if (!date) return alert("Please select a date for your event.");
 
-    const res = await fetch('/api/book', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: mongoId, date: date })
-    });
+    if (!date) {
+        alert("Please select a date for your event.");
+        return;
+    }
 
-    if (res.ok) {
-        alert("Booking Successful! Our team will contact you soon.");
-        dateInput.value = ""; // Clear input
-    } else {
-        alert("Booking failed. Please try again.");
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (selectedDate < today) {
+        alert("You cannot book a past date.");
+        return;
+    }
+
+    // ✅ Confirmation BEFORE sending request
+    const confirmBooking = confirm(`Confirm booking on ${date}?`);
+
+    if (!confirmBooking) {
+        return; // Stop if user cancels
+    }
+
+    try {
+        const res = await fetch('/api/book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item_id: mongoId, date: date })
+        });
+
+        if (res.ok) {
+            alert("Booking Successful! Our team will contact you soon.");
+            dateInput.value = "";
+        } else {
+            const err = await res.json().catch(() => null);
+            alert(err?.message || "Booking failed. Please try again.");
+        }
+
+    } catch (error) {
+        console.error("Booking error:", error);
+        alert("Network error. Please check your connection.");
     }
 }
 
