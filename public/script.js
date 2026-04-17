@@ -1,13 +1,11 @@
 let currentUser = null;
 
-// Helper to switch between views
 function showSection(id) {
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
     if (target) target.classList.remove('hidden');
 }
 
-// Logic to separate Client view from Admin view
 function updateUI() {
     const navAuth = document.getElementById('nav-auth');
     const navUser = document.getElementById('nav-user');
@@ -32,7 +30,6 @@ function updateUI() {
     }
 }
 
-// Auth Handlers
 async function handleLogin() {
     const username = document.getElementById('l-user').value;
     const password = document.getElementById('l-pass').value;
@@ -66,7 +63,6 @@ async function handleRegister() {
     }
 }
 
-// Load Category - Updated for MongoDB _id
 async function loadCategory(cat) {
     const res = await fetch(`/api/items/${cat}`);
     const items = await res.json();
@@ -82,19 +78,22 @@ async function loadCategory(cat) {
                 <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
                 <label style="font-size: 0.8rem; display: block; margin-bottom: 5px;">Select Event Date:</label>
                 <input type="date" id="date-${item._id}">
-                <button style="width: 100%; margin-top: 10px;" onclick="bookItem('${item._id}')">Book Now</button>
+                <button style="width: 100%; margin-top: 10px;" onclick="bookItem('${item._id}', '${item.name}')">Book Now</button>
             </div>
         </div>`).join('');
     showSection('equipment-list');
 }
 
-// Booking Handler - Updated for MongoDB _id
-async function bookItem(mongoId) {
+// FEATURE 2: Booking Confirmation Prompt
+async function bookItem(mongoId, itemName) {
     if (!currentUser) return alert("Please login first!");
     const dateInput = document.getElementById(`date-${mongoId}`);
     const date = dateInput.value;
     
     if (!date) return alert("Please select a date for your event.");
+
+    const confirmBooking = confirm(`Are you sure you want to rent "${itemName}" for ${date}?`);
+    if (!confirmBooking) return;
 
     const res = await fetch('/api/book', {
         method: 'POST',
@@ -104,13 +103,12 @@ async function bookItem(mongoId) {
 
     if (res.ok) {
         alert("Booking Successful! Our team will contact you soon.");
-        dateInput.value = ""; // Clear input
+        dateInput.value = ""; 
     } else {
         alert("Booking failed. Please try again.");
     }
 }
 
-// Client View: Load My Bookings
 async function loadUserBookings() {
     const res = await fetch('/api/my-bookings');
     const bookings = await res.json();
@@ -133,7 +131,7 @@ async function loadUserBookings() {
     showSection('my-bookings');
 }
 
-// Admin View: Load All Bookings & Stats
+// FEATURE 1: Admin Load Data with DELETE button
 async function loadAdminData() {
     const sRes = await fetch('/api/admin/stats');
     const stats = await sRes.json();
@@ -148,11 +146,27 @@ async function loadAdminData() {
             <td>${b.name}</td>
             <td>${b.booking_date}</td>
             <td>₱${b.price.toLocaleString()}</td>
+            <td>
+                <button onclick="cancelBooking('${b.id}')" style="background: #ff4444; padding: 5px 10px; font-size: 0.7rem; color: white;">
+                    DELETE
+                </button>
+            </td>
         </tr>`).join('');
     showSection('admin-panel');
 }
 
-// Logout
+// FEATURE 1: Delete Function for Admin
+async function cancelBooking(id) {
+    if (!confirm("Are you sure you want to cancel/delete this booking?")) return;
+    const res = await fetch(`/api/admin/booking/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        alert("Booking deleted successfully.");
+        loadAdminData();
+    } else {
+        alert("Failed to delete booking.");
+    }
+}
+
 async function logout() {
     await fetch('/api/logout');
     currentUser = null;
@@ -160,5 +174,4 @@ async function logout() {
     showSection('home');
 }
 
-// Default state
 window.onload = () => showSection('home');
