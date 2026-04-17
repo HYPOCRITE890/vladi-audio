@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 
@@ -20,7 +21,7 @@ mongoose.connect(mongoURI, {
     console.error("❌ Could not connect to MongoDB:", err);
 });
 
-// --- SCHEMAS ---
+// --- SCHEMAS (ERD DEFINITIONS) --- [cite: 10, 11, 12]
 const ItemSchema = new mongoose.Schema({
     name: String,
     category: String,
@@ -58,12 +59,12 @@ async function seedDB() {
     try {
         const count = await Item.countDocuments();
         if (count === 0) {
-            console.log("🌱 Seeding initial items...");
+            console.log("🌱 Seeding initial equipment...");
             const mainCats = ["Wedding", "Birthday", "Celebrations", "Concert", "Conference"];
             let allItems = [];
             mainCats.forEach(cat => {
-                allItems.push({ name: "Fullband Setup", category: cat, price: 15000, description: "Professional audio package.", image: "" });
-                allItems.push({ name: "Basic Setup", category: cat, price: 10000, description: "Compact setup for small events.", image: "" });
+                allItems.push({ name: "Fullband Setup", category: cat, price: 15000, description: "Professional setup for large venues.", image: "" });
+                allItems.push({ name: "Basic Setup", category: cat, price: 10000, description: "Compact audio for small gatherings.", image: "" });
             });
             await Item.insertMany(allItems);
             const adminHash = bcrypt.hashSync('admin123', 10);
@@ -72,15 +73,16 @@ async function seedDB() {
     } catch (err) { console.error("⚠️ Seeding Error:", err); }
 }
 
-// --- API ROUTES ---
+// --- API ROUTES --- [cite: 6, 9]
 
+// Register & Login
 app.post('/api/register', async (req, res) => {
     try {
         const hash = bcrypt.hashSync(req.body.password, 10);
         const newUser = new User({ username: req.body.username, password: hash });
         await newUser.save();
         res.json({ success: true });
-    } catch (e) { res.status(400).json({ error: "User already exists" }); }
+    } catch (e) { res.status(400).json({ error: "Username already exists" }); }
 });
 
 app.post('/api/login', async (req, res) => {
@@ -88,10 +90,11 @@ app.post('/api/login', async (req, res) => {
     if (user && bcrypt.compareSync(req.body.password, user.password)) {
         req.session.userId = user._id;
         req.session.role = user.role;
-        res.json({ success: true, role: user.role });
+        res.json({ success: true, role: user.role, username: user.username });
     } else res.status(401).json({ error: "Invalid credentials" });
 });
 
+// Client: View & Book Items
 app.get('/api/items/:category', async (req, res) => {
     const items = await Item.find({ category: req.params.category });
     res.json(items);
@@ -108,15 +111,7 @@ app.post('/api/book', async (req, res) => {
     res.json({ success: true });
 });
 
-// ADMIN DELETE FEATURE
-app.delete('/api/admin/delete-booking/:id', async (req, res) => {
-    if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
-    try {
-        await Booking.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: "Delete failed" }); }
-});
-
+// Admin: Management Features [cite: 6]
 app.get('/api/admin/all-bookings', async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
     const bookings = await Booking.find().populate('user').populate('item');
@@ -126,6 +121,14 @@ app.get('/api/admin/all-bookings', async (req, res) => {
         name: b.item ? b.item.name : "Unknown Item",
         booking_date: b.booking_date
     })));
+});
+
+app.delete('/api/admin/delete-booking/:id', async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: "Delete failed" }); }
 });
 
 const PORT = process.env.PORT || 3000;
