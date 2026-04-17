@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
-const path = require('path');
 
 const app = express();
 
@@ -59,31 +58,29 @@ async function seedDB() {
     try {
         const count = await Item.countDocuments();
         if (count === 0) {
-            console.log("🌱 Database is empty. Seeding initial items...");
+            console.log("🌱 Seeding initial items...");
             const mainCats = ["Wedding", "Birthday", "Celebrations", "Concert", "Conference"];
             let allItems = [];
             mainCats.forEach(cat => {
-                allItems.push({ name: "Fullband Setup", category: cat, price: 15000, description: "Midas M32R, FOH Sync 915, Tama Drums, Amps.", image: "" });
-                allItems.push({ name: "Basic Setup (100 Pax)", category: cat, price: 10000, description: "Midas M32R, Sync 915, NUQ118 Sub, 18 LED Lights.", image: "" });
+                allItems.push({ name: "Fullband Setup", category: cat, price: 15000, description: "Professional audio package.", image: "" });
+                allItems.push({ name: "Basic Setup", category: cat, price: 10000, description: "Compact setup for small events.", image: "" });
             });
             await Item.insertMany(allItems);
             const adminHash = bcrypt.hashSync('admin123', 10);
             await User.findOneAndUpdate({ username: 'admin' }, { username: 'admin', password: adminHash, role: 'admin' }, { upsert: true });
-            console.log("✨ Database Seeded Successfully!");
         }
     } catch (err) { console.error("⚠️ Seeding Error:", err); }
 }
 
 // --- API ROUTES ---
 
-// 1. User Auth
 app.post('/api/register', async (req, res) => {
     try {
         const hash = bcrypt.hashSync(req.body.password, 10);
         const newUser = new User({ username: req.body.username, password: hash });
         await newUser.save();
         res.json({ success: true });
-    } catch (e) { res.status(400).json({ error: "Username already exists" }); }
+    } catch (e) { res.status(400).json({ error: "User already exists" }); }
 });
 
 app.post('/api/login', async (req, res) => {
@@ -91,18 +88,17 @@ app.post('/api/login', async (req, res) => {
     if (user && bcrypt.compareSync(req.body.password, user.password)) {
         req.session.userId = user._id;
         req.session.role = user.role;
-        res.json({ success: true, role: user.role, username: user.username });
+        res.json({ success: true, role: user.role });
     } else res.status(401).json({ error: "Invalid credentials" });
 });
 
-// 2. Client Features
 app.get('/api/items/:category', async (req, res) => {
     const items = await Item.find({ category: req.params.category });
     res.json(items);
 });
 
 app.post('/api/book', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ error: "Please login first" });
+    if (!req.session.userId) return res.status(401).json({ error: "Login required" });
     const newBooking = new Booking({
         user: req.session.userId,
         item: req.body.item_id,
@@ -112,22 +108,13 @@ app.post('/api/book', async (req, res) => {
     res.json({ success: true });
 });
 
-app.get('/api/my-bookings', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json([]);
-    const bookings = await Booking.find({ user: req.session.userId }).populate('item');
-    res.json(bookings.map(b => ({
-        name: b.item ? b.item.name : "Deleted Item",
-        price: b.item ? b.item.price : 0,
-        booking_date: b.booking_date
-    })));
-});
-
-// 3. Admin Features (NEW: DELETE ROUTE INCLUDED)
-app.get('/api/admin/stats', async (req, res) => {
+// ADMIN DELETE FEATURE
+app.delete('/api/admin/delete-booking/:id', async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
-    const clients = await User.countDocuments({ role: 'user' });
-    const bookings = await Booking.countDocuments();
-    res.json({ totalClients: clients, totalBookings: bookings });
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: "Delete failed" }); }
 });
 
 app.get('/api/admin/all-bookings', async (req, res) => {
@@ -141,21 +128,6 @@ app.get('/api/admin/all-bookings', async (req, res) => {
     })));
 });
 
-// THE NEW DELETE FEATURE
-app.delete('/api/admin/delete-booking/:id', async (req, res) => {
-    if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
-    try {
-        await Booking.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: "Delete failed" }); }
-});
-
-app.get('/api/logout', (req, res) => {
-    req.session.destroy();
-    res.json({ success: true });
-});
-
-// --- SERVER START ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server live on port ${PORT}`);
