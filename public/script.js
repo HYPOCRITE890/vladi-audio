@@ -1,5 +1,26 @@
 let currentUser = null;
 
+function confirmAndBook(itemId, itemName) {
+    const date = document.getElementById(`date-${itemId}`).value;
+    if (!date) return alert("Please select a date first.");
+
+    if (confirm(`Confirm booking for ${itemName} on ${date}?`)) {
+        fetch('/api/book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item_id: itemId, date: date })
+        })
+        .then(res => res.json())
+        .then(data => { if (data.success) alert("✅ Booking Successful!"); });
+    }
+}
+
+function deleteBooking(id) {
+    if (confirm("Permanently delete this booking?")) {
+        fetch(`/api/admin/delete-booking/${id}`, { method: 'DELETE' })
+        .then(() => location.reload());
+    }
+}
 // Helper to switch between views
 function showSection(id) {
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
