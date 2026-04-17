@@ -85,9 +85,11 @@ app.get('/api/admin/all-bookings', async (req, res) => {
 });
 
 app.delete('/api/admin/delete-booking/:id', async (req, res) => {
-    if (req.session.role !== 'admin') return res.status(403).send("Denied");
-    await Booking.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
+    if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: "Delete failed" }); }
 });
 
 const PORT = process.env.PORT || 3000;
