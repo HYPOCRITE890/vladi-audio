@@ -163,3 +163,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server live on port ${PORT}`);
 });
+app.post('/api/admin/create-booking', ...)
+app.put('/api/admin/update-booking/:id', ...)
+app.delete('/api/admin/delete-booking/:id', ...)
