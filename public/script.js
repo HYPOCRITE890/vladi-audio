@@ -6,14 +6,32 @@ function showSection(id) {
 async function handleRegister() {
     const user = document.getElementById('r-user').value;
     const pass = document.getElementById('r-pass').value;
-    const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, password: pass })
-    });
-    const data = await res.json();
-    if (data.success) { alert("Registration successful! Please login."); showSection('login'); }
-    else alert(data.error);
+
+    if (!user || !pass) {
+        alert("Please fill in both fields");
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            alert("Registration successful! You can now login.");
+            showSection('login'); 
+        } else {
+            alert(data.error || "Registration failed");
+        }
+    } catch (error) {
+        console.error("Registration Error:", error);
+        alert("Server connection error. Please try again later.");
+    }
+}
 }
 
 async function handleLogin() {
