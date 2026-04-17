@@ -84,7 +84,6 @@ async function loadCategory(cat) {
     showSection('equipment-list');
 }
 
-// FEATURE 2: Booking Confirmation Prompt
 async function bookItem(mongoId, itemName) {
     if (!currentUser) return alert("Please login first!");
     const dateInput = document.getElementById(`date-${mongoId}`);
@@ -92,6 +91,7 @@ async function bookItem(mongoId, itemName) {
     
     if (!date) return alert("Please select a date for your event.");
 
+    // FEATURE: Confirmation Prompt
     const confirmBooking = confirm(`Are you sure you want to rent "${itemName}" for ${date}?`);
     if (!confirmBooking) return;
 
@@ -131,7 +131,7 @@ async function loadUserBookings() {
     showSection('my-bookings');
 }
 
-// FEATURE 1: Admin Load Data with DELETE button
+// FIXED: Admin Load Data
 async function loadAdminData() {
     const sRes = await fetch('/api/admin/stats');
     const stats = await sRes.json();
@@ -140,6 +140,7 @@ async function loadAdminData() {
 
     const bRes = await fetch('/api/admin/all-bookings');
     const bookings = await bRes.json();
+    
     document.getElementById('admin-body').innerHTML = bookings.map(b => `
         <tr>
             <td>${b.username}</td>
@@ -147,7 +148,7 @@ async function loadAdminData() {
             <td>${b.booking_date}</td>
             <td>₱${b.price.toLocaleString()}</td>
             <td>
-                <button onclick="cancelBooking('${b.id}')" style="background: #ff4444; padding: 5px 10px; font-size: 0.7rem; color: white;">
+                <button onclick="cancelBooking('${b.id}')" style="background: #ff4444; padding: 8px 12px; font-size: 0.7rem; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     DELETE
                 </button>
             </td>
@@ -155,15 +156,19 @@ async function loadAdminData() {
     showSection('admin-panel');
 }
 
-// FEATURE 1: Delete Function for Admin
+// FIXED: Admin Delete Function
 async function cancelBooking(id) {
-    if (!confirm("Are you sure you want to cancel/delete this booking?")) return;
-    const res = await fetch(`/api/admin/booking/${id}`, { method: 'DELETE' });
+    if (!confirm("Are you sure you want to delete this booking?")) return;
+    
+    const res = await fetch(`/api/admin/booking/${id}`, {
+        method: 'DELETE'
+    });
+
     if (res.ok) {
-        alert("Booking deleted successfully.");
-        loadAdminData();
+        alert("Booking deleted.");
+        loadAdminData(); // Refresh listahan
     } else {
-        alert("Failed to delete booking.");
+        alert("Error: Could not delete booking.");
     }
 }
 
