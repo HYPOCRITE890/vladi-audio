@@ -132,6 +132,15 @@ app.get('/api/my-bookings', async (req, res) => {
         booking_date: b.booking_date
     }));
     res.json(formatted);
+});// DELETE A BOOKING (Admin Only)
+app.delete('/api/admin/delete-booking/:id', async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "Booking deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete booking" });
+    }
 });
 
 app.get('/api/admin/stats', async (req, res) => {
@@ -152,7 +161,16 @@ app.get('/api/admin/all-bookings', async (req, res) => {
     }));
     res.json(formatted);
 });
-
+// DELETE A BOOKING (Admin Only)
+app.delete('/api/admin/delete-booking/:id', async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "Booking deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete booking" });
+    }
+});
 app.get('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true });
