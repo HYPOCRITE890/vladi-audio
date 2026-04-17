@@ -3,157 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VLADI AUDIO | Professional Sound Solutions</title>
+    <title>VLADI AUDIO | Booking System</title>
     <style>
-        /* --- PROFESSIONAL DESIGN (Bringing back the UI) --- */
+        /* --- RESTORED DARK CYAN THEME --- */
         :root {
-            --primary: #d4af37; /* Gold */
-            --dark: #1a1a1a;
-            --light: #f4f4f4;
+            --primary-cyan: #008b8b; /* Dark Cyan */
+            --accent-gold: #d4af37;
+            --dark-bg: #121212;
+            --glass: rgba(255, 255, 255, 0.1);
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); margin: 0; padding: 0; }
-        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            color: white;
+            /* Replace the URL below with your actual image link if it's different */
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+
         header { 
-            background: var(--dark); 
-            color: var(--primary); 
-            padding: 40px 20px; 
             text-align: center; 
-            border-bottom: 4px solid var(--primary);
+            padding: 50px 20px; 
+            background: rgba(0, 139, 139, 0.2);
+            border-bottom: 2px solid var(--primary-cyan);
         }
 
-        .nav-bar { background: #333; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 1000; }
-        .nav-bar button { 
-            background: transparent; color: white; border: 1px solid var(--primary); 
-            padding: 8px 20px; margin: 5px; cursor: pointer; transition: 0.3s;
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+
+        /* Auth Forms */
+        .auth-box { 
+            background: var(--glass); 
+            backdrop-filter: blur(10px);
+            padding: 30px; 
+            border-radius: 15px; 
+            border: 1px solid var(--primary-cyan);
+            max-width: 400px; 
+            margin: 20px auto; 
+            text-align: center;
         }
-        .nav-bar button:hover { background: var(--primary); color: black; }
 
-        .container { max-width: 1100px; margin: 30px auto; padding: 20px; }
+        input { 
+            width: 90%; padding: 12px; margin: 10px 0; 
+            background: rgba(255,255,255,0.1); border: 1px solid var(--primary-cyan); 
+            color: white; border-radius: 5px; 
+        }
 
-        .section-title { text-align: center; color: var(--dark); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+        button { 
+            padding: 12px 25px; cursor: pointer; border-radius: 5px; border: none; 
+            font-weight: bold; transition: 0.3s; margin: 5px;
+        }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .btn-cyan { background: var(--primary-cyan); color: white; }
+        .btn-cyan:hover { background: #00a0a0; }
 
-        /* Equipment Cards */
+        .nav-bar { text-align: center; margin-bottom: 30px; }
+
+        /* Grid & Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .card { 
-            background: white; border-radius: 12px; overflow: hidden; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s;
-            border-top: 5px solid var(--primary);
+            background: var(--glass); backdrop-filter: blur(5px);
+            padding: 20px; border-radius: 10px; border-left: 5px solid var(--primary-cyan);
         }
-        .card:hover { transform: translateY(-10px); }
-        .card-content { padding: 20px; }
-        .card h3 { margin: 0; color: var(--dark); }
-        .card p { color: #666; font-size: 14px; height: 40px; }
-        .price { font-size: 22px; color: var(--dark); font-weight: bold; margin: 15px 0; }
 
-        input[type="date"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; background: var(--glass); margin-top: 20px; }
+        th { background: var(--primary-cyan); padding: 15px; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
 
-        .btn-book { 
-            width: 100%; background: var(--dark); color: var(--primary); 
-            border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 5px;
-        }
-        .btn-book:hover { background: #333; }
-
-        /* Admin Table Styling */
-        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
-        th { background: var(--dark); color: var(--primary); padding: 15px; }
-        td { padding: 15px; border-bottom: 1px solid #ddd; text-align: center; }
-        .btn-delete { background: #ff4444; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
-
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>VLADI AUDIO</h1>
-    <p>Premium Sound System & Stage Production</p>
+    <p>Premium Sound System Rentals</p>
 </header>
 
-<div class="nav-bar">
-    <button onclick="loadItems('Wedding')">Weddings</button>
-    <button onclick="loadItems('Concert')">Concerts</button>
-    <button onclick="loadItems('Birthday')">Birthdays</button>
-    <button onclick="loadItems('Conference')">Conferences</button>
-    <button onclick="loadAdmin()">Admin Dashboard</button>
-</div>
-
-<div class="container" id="view-container">
-    <h2 class="section-title">Select an Event Category to Begin</h2>
-    <div id="items-grid" class="grid">
+<div class="container">
+    <div id="auth-section">
+        <div class="auth-box">
+            <h2 id="auth-title">Login</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button class="btn-cyan" onclick="handleAuth()">Submit</button>
+            <p onclick="toggleAuth()" style="cursor:pointer; font-size: 12px; color: var(--primary-cyan);">
+                Switch to Register/Login
+            </p>
         </div>
+    </div>
+
+    <div id="app-section" class="hidden">
+        <div class="nav-bar">
+            <button class="btn-cyan" onclick="loadItems('Wedding')">Weddings</button>
+            <button class="btn-cyan" onclick="loadItems('Concert')">Concerts</button>
+            <button class="btn-cyan" onclick="loadItems('Birthday')">Birthdays</button>
+            <button class="btn-cyan" id="admin-btn" onclick="loadAdmin()" style="display:none; border: 1px solid gold;">ADMIN PANEL</button>
+            <button onclick="location.reload()" style="background:transparent; color:white; border:1px solid white;">Logout</button>
+        </div>
+
+        <div id="display-area">
+            <h2 style="text-align:center;">Welcome back, <span id="user-display"></span>!</h2>
+            <p style="text-align:center;">Select a category above to view equipment.</p>
+        </div>
+    </div>
 </div>
 
 <script>
-    // --- FEATURE: LOAD EQUIPMENT ---
-    function loadItems(category) {
-        const container = document.getElementById('view-container');
-        container.innerHTML = `<h2 class="section-title">${category} Packages</h2><div id="items-grid" class="grid"></div>`;
-        
-        fetch(`/api/items/${category}`)
+    let isRegister = false;
+
+    function toggleAuth() {
+        isRegister = !isRegister;
+        document.getElementById('auth-title').innerText = isRegister ? "Register" : "Login";
+    }
+
+    // --- AUTH LOGIC ---
+    function handleAuth() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const route = isRegister ? '/api/register' : '/api/login';
+
+        fetch(route, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (isRegister) {
+                    alert("Account created! Now please Login.");
+                    toggleAuth();
+                } else {
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('app-section').classList.remove('hidden');
+                    document.getElementById('user-display').innerText = u;
+                    if (data.role === 'admin') document.getElementById('admin-btn').style.display = 'inline-block';
+                }
+            } else {
+                alert(data.error || "Login Failed");
+            }
+        });
+    }
+
+    // --- ITEM LOADING ---
+    function loadItems(cat) {
+        fetch(`/api/items/${cat}`)
             .then(res => res.json())
             .then(items => {
-                const grid = document.getElementById('items-grid');
+                let html = `<h2>${cat} Packages</h2><div class="grid">`;
                 items.forEach(item => {
-                    grid.innerHTML += `
+                    html += `
                         <div class="card">
-                            <div class="card-content">
-                                <h3>${item.name}</h3>
-                                <p>${item.description}</p>
-                                <div class="price">₱${item.price.toLocaleString()}</div>
-                                <label>Target Event Date:</label>
-                                <input type="date" id="date-${item._id}">
-                                <button class="btn-book" onclick="confirmAndBook('${item._id}', '${item.name}')">BOOK RESERVATION</button>
-                            </div>
-                        </div>
-                    `;
+                            <h3>${item.name}</h3>
+                            <p>${item.description}</p>
+                            <p style="color:var(--primary-cyan); font-weight:bold;">₱${item.price}</p>
+                            <input type="date" id="date-${item._id}">
+                            <button class="btn-cyan" onclick="confirmBook('${item._id}', '${item.name}')">Book Now</button>
+                        </div>`;
                 });
+                html += `</div>`;
+                document.getElementById('display-area').innerHTML = html;
             });
     }
 
-    // --- FEATURE: CLIENT CONFIRMATION POP-UP ---
-    function confirmAndBook(itemId, itemName) {
-        const date = document.getElementById(`date-${itemId}`).value;
-        if (!date) return alert("Please select a date first!");
+    // --- BOOKING WITH CONFIRMATION ---
+    function confirmBook(id, name) {
+        const d = document.getElementById(`date-${id}`).value;
+        if (!d) return alert("Select a date!");
 
-        if (confirm(`ARE YOU SURE?\n\nYou are booking: ${itemName}\nFor the date: ${date}\n\nClick OK to confirm.`)) {
+        if (confirm(`Confirm booking for ${name} on ${d}?`)) {
             fetch('/api/book', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item_id: itemId, date: date })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) alert("✅ Booking Success! Vladi Audio will contact you shortly.");
-            });
+                body: JSON.stringify({ item_id: id, date: d })
+            }).then(() => alert("Booking Sent!"));
         }
     }
 
-    // --- FEATURE: ADMIN DELETE & VIEW ---
+    // --- ADMIN VIEW & DELETE ---
     function loadAdmin() {
-        const pass = prompt("Enter Admin Access Code:");
-        if (pass !== "admin123") return alert("Unauthorized Access");
-
         fetch('/api/admin/all-bookings')
             .then(res => res.json())
             .then(bookings => {
-                let html = '<h2 class="section-title">Master Booking List</h2>';
-                html += '<table><tr><th>Client</th><th>Equipment</th><th>Event Date</th><th>Management</th></tr>';
+                let html = '<h2>Master Booking List</h2><table><tr><th>Client</th><th>Item</th><th>Date</th><th>Manage</th></tr>';
                 bookings.forEach(b => {
                     html += `<tr>
                         <td>${b.username}</td>
                         <td>${b.name}</td>
                         <td>${b.booking_date}</td>
-                        <td><button class="btn-delete" onclick="deleteBooking('${b._id}')">CANCEL/DELETE</button></td>
+                        <td><button onclick="deleteB('${b._id}')" style="background:#ff4444; color:white; border:none; padding:5px;">Cancel</button></td>
                     </tr>`;
                 });
                 html += '</table>';
-                document.getElementById('view-container').innerHTML = html;
+                document.getElementById('display-area').innerHTML = html;
             });
     }
 
-    function deleteBooking(id) {
-        if (confirm("WARNING: This will permanently delete the client's reservation. Proceed?")) {
+    function deleteB(id) {
+        if (confirm("Delete this booking?")) {
             fetch(`/api/admin/delete-booking/${id}`, { method: 'DELETE' })
                 .then(() => loadAdmin());
         }
