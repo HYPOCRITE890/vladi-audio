@@ -1,11 +1,6 @@
 let currentUser = null;
 
-// Helper to switch between views
-function showSection(id) {
-    document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-    const target = document.getElementById(id);
-    if (target) target.classList.remove('hidden');
-}
+
 // show section
 function showSection(sectionId) {
     // hide all sections
