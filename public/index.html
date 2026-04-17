@@ -2,214 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VLADI AUDIO | Booking System</title>
-    <style>
-        /* --- RESTORED DARK CYAN THEME --- */
-        :root {
-            --primary-cyan: #008b8b; /* Dark Cyan */
-            --accent-gold: #d4af37;
-            --dark-bg: #121212;
-            --glass: rgba(255, 255, 255, 0.1);
-        }
-
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            color: white;
-            /* Replace the URL below with your actual image link if it's different */
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                        url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-        }
-
-        header { 
-            text-align: center; 
-            padding: 50px 20px; 
-            background: rgba(0, 139, 139, 0.2);
-            border-bottom: 2px solid var(--primary-cyan);
-        }
-
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-
-        /* Auth Forms */
-        .auth-box { 
-            background: var(--glass); 
-            backdrop-filter: blur(10px);
-            padding: 30px; 
-            border-radius: 15px; 
-            border: 1px solid var(--primary-cyan);
-            max-width: 400px; 
-            margin: 20px auto; 
-            text-align: center;
-        }
-
-        input { 
-            width: 90%; padding: 12px; margin: 10px 0; 
-            background: rgba(255,255,255,0.1); border: 1px solid var(--primary-cyan); 
-            color: white; border-radius: 5px; 
-        }
-
-        button { 
-            padding: 12px 25px; cursor: pointer; border-radius: 5px; border: none; 
-            font-weight: bold; transition: 0.3s; margin: 5px;
-        }
-
-        .btn-cyan { background: var(--primary-cyan); color: white; }
-        .btn-cyan:hover { background: #00a0a0; }
-
-        .nav-bar { text-align: center; margin-bottom: 30px; }
-
-        /* Grid & Cards */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { 
-            background: var(--glass); backdrop-filter: blur(5px);
-            padding: 20px; border-radius: 10px; border-left: 5px solid var(--primary-cyan);
-        }
-
-        table { width: 100%; border-collapse: collapse; background: var(--glass); margin-top: 20px; }
-        th { background: var(--primary-cyan); padding: 15px; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
-
-        .hidden { display: none; }
-    </style>
+    <title>Vladi Audio Section</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-    <h1>VLADI AUDIO</h1>
-    <p>Premium Sound System Rentals</p>
-</header>
-
-<div class="container">
-    <div id="auth-section">
-        <div class="auth-box">
-            <h2 id="auth-title">Login</h2>
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <button class="btn-cyan" onclick="handleAuth()">Submit</button>
-            <p onclick="toggleAuth()" style="cursor:pointer; font-size: 12px; color: var(--primary-cyan);">
-                Switch to Register/Login
-            </p>
+    <nav>
+        <h1 onclick="showSection('home')">VLADI AUDIO SECTION</h1>
+        <div id="nav-auth">
+            <button onclick="showSection('login')">Login</button>
+            <button onclick="showSection('register')">Register</button>
         </div>
-    </div>
-
-    <div id="app-section" class="hidden">
-        <div class="nav-bar">
-            <button class="btn-cyan" onclick="loadItems('Wedding')">Weddings</button>
-            <button class="btn-cyan" onclick="loadItems('Concert')">Concerts</button>
-            <button class="btn-cyan" onclick="loadItems('Birthday')">Birthdays</button>
-            <button class="btn-cyan" id="admin-btn" onclick="loadAdmin()" style="display:none; border: 1px solid gold;">ADMIN PANEL</button>
-            <button onclick="location.reload()" style="background:transparent; color:white; border:1px solid white;">Logout</button>
+        <div id="nav-user" class="hidden">
+            <span id="user-display"></span>
+            <button id="my-bookings-btn" onclick="loadUserBookings()">My Bookings</button>
+            <button id="admin-btn" class="hidden" onclick="loadAdminData()">Admin Panel</button>
+            <button onclick="logout()">Logout</button>
         </div>
+    </nav>
 
-        <div id="display-area">
-            <h2 style="text-align:center;">Welcome back, <span id="user-display"></span>!</h2>
-            <p style="text-align:center;">Select a category above to view equipment.</p>
+    <section id="home" class="active">
+        <div class="hero">
+            <h2>Select Event Type</h2>
+            <div class="event-grid">
+                <div class="card" onclick="loadCategory('Wedding')">
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400" alt="Wedding">
+                    <div class="card-text"><h3>Wedding</h3></div>
+                </div>
+                <div class="card" onclick="loadCategory('Birthday')">
+                    <img src="https://images.unsplash.com/photo-1530103043960-ef38714abb15?w=400" alt="Birthday">
+                    <div class="card-text"><h3>Birthday</h3></div>
+                </div>
+                <div class="card" onclick="loadCategory('Concert')">
+                    <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400" alt="Concert">
+                    <div class="card-text"><h3>Concert</h3></div>
+                </div>
+                <div class="card" onclick="loadCategory('Conference')">
+                    <img src="https://images.unsplash.com/photo-1505373633560-fa3a19361545?w=400" alt="Conference">
+                    <div class="card-text"><h3>Conference</h3></div>
+                </div>
+                <div class="card" onclick="loadCategory('Celebrations')">
+                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400" alt="Celebrations">
+                    <div class="card-text"><h3>Celebrations</h3></div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<script>
-    let isRegister = false;
+    <section id="equipment-list" class="hidden">
+        <h2 id="category-title">Equipment</h2>
+        <div id="items-container" class="item-grid"></div>
+    </section>
 
-    function toggleAuth() {
-        isRegister = !isRegister;
-        document.getElementById('auth-title').innerText = isRegister ? "Register" : "Login";
-    }
+    <section id="login" class="hidden">
+        <div class="form-box">
+            <h2>Login</h2>
+            <input type="text" id="l-user" placeholder="Username">
+            <input type="password" id="l-pass" placeholder="Password">
+            <button onclick="handleLogin()">Sign In</button>
+        </div>
+    </section>
 
-    // --- AUTH LOGIC ---
-    function handleAuth() {
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
-        const route = isRegister ? '/api/register' : '/api/login';
+    <section id="register" class="hidden">
+        <div class="form-box">
+            <h2>Register</h2>
+            <input type="text" id="r-user" placeholder="Username">
+            <input type="password" id="r-pass" placeholder="Password">
+            <button onclick="handleRegister()">Create Account</button>
+        </div>
+    </section>
 
-        fetch(route, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: u, password: p })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                if (isRegister) {
-                    alert("Account created! Now please Login.");
-                    toggleAuth();
-                } else {
-                    document.getElementById('auth-section').classList.add('hidden');
-                    document.getElementById('app-section').classList.remove('hidden');
-                    document.getElementById('user-display').innerText = u;
-                    if (data.role === 'admin') document.getElementById('admin-btn').style.display = 'inline-block';
-                }
-            } else {
-                alert(data.error || "Login Failed");
-            }
-        });
-    }
+    <section id="my-bookings" class="hidden">
+        <h2>Your Bookings</h2>
+        <div id="user-booking-list"></div>
+        <h3 id="user-total"></h3>
+    </section>
 
-    // --- ITEM LOADING ---
-    function loadItems(cat) {
-        fetch(`/api/items/${cat}`)
-            .then(res => res.json())
-            .then(items => {
-                let html = `<h2>${cat} Packages</h2><div class="grid">`;
-                items.forEach(item => {
-                    html += `
-                        <div class="card">
-                            <h3>${item.name}</h3>
-                            <p>${item.description}</p>
-                            <p style="color:var(--primary-cyan); font-weight:bold;">₱${item.price}</p>
-                            <input type="date" id="date-${item._id}">
-                            <button class="btn-cyan" onclick="confirmBook('${item._id}', '${item.name}')">Book Now</button>
-                        </div>`;
-                });
-                html += `</div>`;
-                document.getElementById('display-area').innerHTML = html;
-            });
-    }
+    <section id="admin-panel" class="hidden">
+        <h2>Admin Dashboard</h2>
+        <div class="stats-bar">
+            <div class="stat-card"><h3>Total Clients</h3><p id="stat-clients">0</p></div>
+            <div class="stat-card"><h3>Total Bookings</h3><p id="stat-bookings">0</p></div>
+        </div>
+        <table>
+            <thead><tr><th>User</th><th>Item</th><th>Date</th><th>Price</th></tr></thead>
+            <tbody id="admin-body"></tbody>
+        </table>
+    </section>
 
-    // --- BOOKING WITH CONFIRMATION ---
-    function confirmBook(id, name) {
-        const d = document.getElementById(`date-${id}`).value;
-        if (!d) return alert("Select a date!");
-
-        if (confirm(`Confirm booking for ${name} on ${d}?`)) {
-            fetch('/api/book', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item_id: id, date: d })
-            }).then(() => alert("Booking Sent!"));
-        }
-    }
-
-    // --- ADMIN VIEW & DELETE ---
-    function loadAdmin() {
-        fetch('/api/admin/all-bookings')
-            .then(res => res.json())
-            .then(bookings => {
-                let html = '<h2>Master Booking List</h2><table><tr><th>Client</th><th>Item</th><th>Date</th><th>Manage</th></tr>';
-                bookings.forEach(b => {
-                    html += `<tr>
-                        <td>${b.username}</td>
-                        <td>${b.name}</td>
-                        <td>${b.booking_date}</td>
-                        <td><button onclick="deleteB('${b._id}')" style="background:#ff4444; color:white; border:none; padding:5px;">Cancel</button></td>
-                    </tr>`;
-                });
-                html += '</table>';
-                document.getElementById('display-area').innerHTML = html;
-            });
-    }
-
-    function deleteB(id) {
-        if (confirm("Delete this booking?")) {
-            fetch(`/api/admin/delete-booking/${id}`, { method: 'DELETE' })
-                .then(() => loadAdmin());
-        }
-    }
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
