@@ -3,13 +3,11 @@ let currentUser = null;
 
 // show section
 function showSection(sectionId) {
-    // hide all sections
     document.querySelectorAll("section").forEach(sec => {
         sec.classList.add("hidden");
         sec.classList.remove("active");
     });
 
-    // show selected section
     const target = document.getElementById(sectionId);
     if (target) {
         target.classList.remove("hidden");
