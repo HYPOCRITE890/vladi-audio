@@ -6,7 +6,21 @@ function showSection(id) {
     const target = document.getElementById(id);
     if (target) target.classList.remove('hidden');
 }
+// show section
+function showSection(sectionId) {
+    // hide all sections
+    document.querySelectorAll("section").forEach(sec => {
+        sec.classList.add("hidden");
+        sec.classList.remove("active");
+    });
 
+    // show selected section
+    const target = document.getElementById(sectionId);
+    if (target) {
+        target.classList.remove("hidden");
+        target.classList.add("active");
+    }
+}
 // Logic to separate Client view from Admin view
 function updateUI() {
     const navAuth = document.getElementById('nav-auth');
