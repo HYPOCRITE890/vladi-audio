@@ -3,7 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Vladi Audio Section</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- RESTORED DARK CYAN & BLACK THEME --- */
+        :root { --cyan: #00ffaa; --bg: #0a0a0a; --glass: rgba(255, 255, 255, 0.05); }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: white; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 2px solid var(--cyan); background: #000; }
+        h1 { color: var(--cyan); cursor: pointer; font-size: 24px; margin: 0; }
+        .hidden { display: none; }
+        .container { padding: 40px; text-align: center; }
+        
+        /* Auth & Nav Buttons */
+        button { background: var(--cyan); color: black; border: none; padding: 8px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+        .form-box { background: #111; padding: 30px; border: 1px solid var(--cyan); width: 300px; margin: 50px auto; border-radius: 8px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #333; color: var(--cyan); }
+
+        /* Event Grid matching image_4a6a42.jpg */
+        .event-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 30px; }
+        .card { background: #151515; border-radius: 15px; width: 230px; overflow: hidden; cursor: pointer; border: 1px solid #222; transition: 0.3s; }
+        .card:hover { border-color: var(--cyan); transform: scale(1.02); }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
+        .card-text { padding: 15px; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #111; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: center; }
+        th { color: var(--cyan); }
+    </style>
 </head>
 <body>
     <nav>
@@ -14,80 +38,75 @@
         </div>
         <div id="nav-user" class="hidden">
             <span id="user-display"></span>
-            <button id="my-bookings-btn" onclick="loadUserBookings()">My Bookings</button>
+            <button onclick="showSection('my-bookings')">My Bookings</button>
             <button id="admin-btn" class="hidden" onclick="loadAdminData()">Admin Panel</button>
             <button onclick="logout()">Logout</button>
         </div>
     </nav>
 
-    <section id="home" class="active">
-        <div class="hero">
+    <div class="container">
+        <section id="home">
             <h2>Select Event Type</h2>
             <div class="event-grid">
                 <div class="card" onclick="loadCategory('Wedding')">
                     <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400" alt="Wedding">
-                    <div class="card-text"><h3>Wedding</h3></div>
+                    <div class="card-text">Wedding</div>
                 </div>
                 <div class="card" onclick="loadCategory('Birthday')">
                     <img src="https://images.unsplash.com/photo-1530103043960-ef38714abb15?w=400" alt="Birthday">
-                    <div class="card-text"><h3>Birthday</h3></div>
+                    <div class="card-text">Birthday</div>
                 </div>
                 <div class="card" onclick="loadCategory('Concert')">
                     <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400" alt="Concert">
-                    <div class="card-text"><h3>Concert</h3></div>
+                    <div class="card-text">Concert</div>
                 </div>
                 <div class="card" onclick="loadCategory('Conference')">
                     <img src="https://images.unsplash.com/photo-1505373633560-fa3a19361545?w=400" alt="Conference">
-                    <div class="card-text"><h3>Conference</h3></div>
+                    <div class="card-text">Conference</div>
                 </div>
                 <div class="card" onclick="loadCategory('Celebrations')">
                     <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400" alt="Celebrations">
-                    <div class="card-text"><h3>Celebrations</h3></div>
+                    <div class="card-text">Celebrations</div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="equipment-list" class="hidden">
-        <h2 id="category-title">Equipment</h2>
-        <div id="items-container" class="item-grid"></div>
-    </section>
+        <section id="equipment-list" class="hidden">
+            <h2 id="category-title">Equipment</h2>
+            <div id="items-container" class="event-grid"></div>
+        </section>
 
-    <section id="login" class="hidden">
-        <div class="form-box">
-            <h2>Login</h2>
-            <input type="text" id="l-user" placeholder="Username">
-            <input type="password" id="l-pass" placeholder="Password">
-            <button onclick="handleLogin()">Sign In</button>
-        </div>
-    </section>
+        <section id="login" class="hidden">
+            <div class="form-box">
+                <h2>Login</h2>
+                <input type="text" id="l-user" placeholder="Username">
+                <input type="password" id="l-pass" placeholder="Password">
+                <button onclick="handleLogin()">Sign In</button>
+            </div>
+        </section>
 
-    <section id="register" class="hidden">
-        <div class="form-box">
-            <h2>Register</h2>
-            <input type="text" id="r-user" placeholder="Username">
-            <input type="password" id="r-pass" placeholder="Password">
-            <button onclick="handleRegister()">Create Account</button>
-        </div>
-    </section>
+        <section id="register" class="hidden">
+            <div class="form-box">
+                <h2>Register</h2>
+                <input type="text" id="r-user" placeholder="Username">
+                <input type="password" id="r-pass" placeholder="Password">
+                <button onclick="handleRegister()">Create Account</button>
+            </div>
+        </section>
 
-    <section id="my-bookings" class="hidden">
-        <h2>Your Bookings</h2>
-        <div id="user-booking-list"></div>
-        <h3 id="user-total"></h3>
-    </section>
+        <section id="my-bookings" class="hidden">
+            <h2>Your Bookings</h2>
+            <div id="user-booking-list"></div>
+        </section>
 
-    <section id="admin-panel" class="hidden">
-        <h2>Admin Dashboard</h2>
-        <div class="stats-bar">
-            <div class="stat-card"><h3>Total Clients</h3><p id="stat-clients">0</p></div>
-            <div class="stat-card"><h3>Total Bookings</h3><p id="stat-bookings">0</p></div>
-        </div>
-        <table>
-            <thead><tr><th>User</th><th>Item</th><th>Date</th><th>Price</th></tr></thead>
-            <tbody id="admin-body"></tbody>
-        </table>
-    </section>
+        <section id="admin-panel" class="hidden">
+            <h2>Admin Dashboard</h2>
+            <table>
+                <thead><tr><th>User</th><th>Item</th><th>Date</th><th>Command</th></tr></thead>
+                <tbody id="admin-body"></tbody>
+            </table>
+        </section>
+    </div>
 
     <script src="script.js"></script>
 </body>
