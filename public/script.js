@@ -173,23 +173,64 @@ async function loadUserBookings() {
     document.getElementById('user-total').innerText = `Total Expense: ₱${total.toLocaleString()}`;
     showSection('my-bookings');
 }
+// Add 
+async function createBooking(data) {
+    await fetch('/api/admin/create-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
 
+    loadAdminData(); // refresh
+}
+createBooking({
+    username: "john",
+    name: "Wedding Package",
+    booking_date: "2026-05-01",
+    price: 15000
+});
+// Update
+async function updateBooking(id, value, field) {
+    await fetch(`/api/admin/update-booking/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+    });
+}
+//Delete
+async function deleteBooking(id) {
+    if (!confirm("Delete this booking?")) return;
+
+    await fetch(`/api/admin/delete-booking/${id}`, {
+        method: 'DELETE'
+    });
+
+    loadAdminData(); // refresh
+}
 // Admin View: Load All Bookings & Stats
 async function loadAdminData() {
+    // READ (stats)
     const sRes = await fetch('/api/admin/stats');
     const stats = await sRes.json();
     document.getElementById('stat-clients').innerText = stats.totalClients;
     document.getElementById('stat-bookings').innerText = stats.totalBookings;
 
+    // READ (bookings)
     const bRes = await fetch('/api/admin/all-bookings');
     const bookings = await bRes.json();
+
     document.getElementById('admin-body').innerHTML = bookings.map(b => `
         <tr>
             <td>${b.username}</td>
-            <td>${b.name}</td>
-            <td>${b.booking_date}</td>
-            <td>₱${b.price.toLocaleString()}</td>
-        </tr>`).join('');
+            <td contenteditable="true" onblur="updateBooking('${b._id}', this.innerText, 'name')">${b.name}</td>
+            <td contenteditable="true" onblur="updateBooking('${b._id}', this.innerText, 'booking_date')">${b.booking_date}</td>
+            <td contenteditable="true" onblur="updateBooking('${b._id}', this.innerText, 'price')">₱${b.price.toLocaleString()}</td>
+            <td>
+                <button onclick="deleteBooking('${b._id}')">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+
     showSection('admin-panel');
 }
 
