@@ -2,93 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vladi Audio Section</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vladi Audio | Booking System</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        header { background: #333; color: white; padding: 15px; text-align: center; border-radius: 8px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
+        button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 5px; }
+        .btn-book { background: #28a745; color: white; }
+        .btn-delete { background: #dc3545; color: white; margin-top: 10px; }
+        nav { margin-bottom: 20px; text-align: center; }
+        nav button { margin: 5px; background: #007bff; color: white; }
+    </style>
 </head>
 <body>
-    <nav>
-        <h1 onclick="showSection('home')">VLADI AUDIO SECTION</h1>
-        <div id="nav-auth">
-            <button onclick="showSection('login')">Login</button>
-            <button onclick="showSection('register')">Register</button>
-        </div>
-        <div id="nav-user" class="hidden">
-            <span id="user-display"></span>
-            <button id="my-bookings-btn" onclick="loadUserBookings()">My Bookings</button>
-            <button id="admin-btn" class="hidden" onclick="loadAdminData()">Admin Panel</button>
-            <button onclick="logout()">Logout</button>
-        </div>
+
+<header>
+    <h1>Vladi Audio Section</h1>
+    <p>Premium Sound System Rentals</p>
+</header>
+
+<div class="container">
+    <nav id="category-nav">
+        <button onclick="loadItems('Wedding')">Weddings</button>
+        <button onclick="loadItems('Concert')">Concerts</button>
+        <button onclick="loadItems('Birthday')">Birthdays</button>
+        <button onclick="loadAdmin()">Admin View</button>
     </nav>
 
-    <section id="home" class="active">
-        <div class="hero">
-            <h2>Select Event Type</h2>
-            <div class="event-grid">
-                <div class="card" onclick="loadCategory('Wedding')">
-                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400" alt="Wedding">
-                    <div class="card-text"><h3>Wedding</h3></div>
-                </div>
-                <div class="card" onclick="loadCategory('Birthday')">
-                    <img src="https://images.unsplash.com/photo-1530103043960-ef38714abb15?w=400" alt="Birthday">
-                    <div class="card-text"><h3>Birthday</h3></div>
-                </div>
-                <div class="card" onclick="loadCategory('Concert')">
-                    <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400" alt="Concert">
-                    <div class="card-text"><h3>Concert</h3></div>
-                </div>
-                <div class="card" onclick="loadCategory('Conference')">
-                    <img src="https://images.unsplash.com/photo-1505373633560-fa3a19361545?w=400" alt="Conference">
-                    <div class="card-text"><h3>Conference</h3></div>
-                </div>
-                <div class="card" onclick="loadCategory('Celebrations')">
-                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400" alt="Celebrations">
-                    <div class="card-text"><h3>Celebrations</h3></div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div id="main-content">
+        <h2>Available Equipment</h2>
+        <div id="items-grid" class="grid"></div>
+    </div>
+</div>
 
-    <section id="equipment-list" class="hidden">
-        <h2 id="category-title">Equipment</h2>
-        <div id="items-container" class="item-grid"></div>
-    </section>
+<script>
+    // --- CLIENT: VIEW & BOOK --- [cite: 6]
+    function loadItems(category) {
+        document.getElementById('main-content').innerHTML = `<h2>${category} Packages</h2><div id="items-grid" class="grid"></div>`;
+        fetch(`/api/items/${category}`)
+            .then(res => res.json())
+            .then(items => {
+                const grid = document.getElementById('items-grid');
+                items.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="card">
+                            <h3>${item.name}</h3>
+                            <p>${item.description}</p>
+                            <p><strong>₱${item.price}</strong></p>
+                            <input type="date" id="date-${item._id}"><br><br>
+                            <button class="btn-book" onclick="confirmBooking('${item._id}', '${item.name}')">Book Now</button>
+                        </div>
+                    `;
+                });
+            });
+    }
 
-    <section id="login" class="hidden">
-        <div class="form-box">
-            <h2>Login</h2>
-            <input type="text" id="l-user" placeholder="Username">
-            <input type="password" id="l-pass" placeholder="Password">
-            <button onclick="handleLogin()">Sign In</button>
-        </div>
-    </section>
+    function confirmBooking(id, name) {
+        const date = document.getElementById(`date-${id}`).value;
+        if (!date) return alert("Please select a date!");
 
-    <section id="register" class="hidden">
-        <div class="form-box">
-            <h2>Register</h2>
-            <input type="text" id="r-user" placeholder="Username">
-            <input type="password" id="r-pass" placeholder="Password">
-            <button onclick="handleRegister()">Create Account</button>
-        </div>
-    </section>
+        // FEATURE: Confirmation Prompt [cite: 6]
+        if (confirm(`Are you sure you want to rent the ${name} for ${date}?`)) {
+            fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: id, date: date })
+            }).then(() => alert("Booking Sent!"));
+        }
+    }
 
-    <section id="my-bookings" class="hidden">
-        <h2>Your Bookings</h2>
-        <div id="user-booking-list"></div>
-        <h3 id="user-total"></h3>
-    </section>
+    // --- ADMIN: MANAGE BOOKINGS --- [cite: 6]
+    function loadAdmin() {
+        const password = prompt("Admin Password:");
+        if (password !== "admin123") return alert("Access Denied");
 
-    <section id="admin-panel" class="hidden">
-        <h2>Admin Dashboard</h2>
-        <div class="stats-bar">
-            <div class="stat-card"><h3>Total Clients</h3><p id="stat-clients">0</p></div>
-            <div class="stat-card"><h3>Total Bookings</h3><p id="stat-bookings">0</p></div>
-        </div>
-        <table>
-            <thead><tr><th>User</th><th>Item</th><th>Date</th><th>Price</th></tr></thead>
-            <tbody id="admin-body"></tbody>
-        </table>
-    </section>
+        fetch('/api/admin/all-bookings')
+            .then(res => res.json())
+            .then(bookings => {
+                let html = '<h2>Admin Dashboard</h2><table border="1" width="100%" cellpadding="10">';
+                html += '<tr><th>Client</th><th>Item</th><th>Date</th><th>Action</th></tr>';
+                bookings.forEach(b => {
+                    html += `<tr>
+                        <td>${b.username}</td>
+                        <td>${b.name}</td>
+                        <td>${b.booking_date}</td>
+                        <td><button class="btn-delete" onclick="deleteBooking('${b._id}')">Delete</button></td>
+                    </tr>`;
+                });
+                html += '</table>';
+                document.getElementById('main-content').innerHTML = html;
+            });
+    }
 
-    <script src="script.js"></script>
+    function deleteBooking(id) {
+        if (confirm("Permanently delete this booking?")) {
+            fetch(`/api/admin/delete-booking/${id}`, { method: 'DELETE' })
+                .then(() => loadAdmin());
+        }
+    }
+</script>
+
 </body>
 </html>
