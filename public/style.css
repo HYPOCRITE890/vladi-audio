@@ -1,0 +1,55 @@
+:root { --accent: #00ffcc; --bg: #050505; --panel: #111; }
+body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; }
+.hidden { display: none !important; }
+
+nav { display: flex; justify-content: space-between; padding: 20px 40px; background: #000; border-bottom: 2px solid var(--accent); align-items: center; }
+nav h1 { cursor: pointer; color: var(--accent); margin: 0; letter-spacing: 2px; }
+
+section { padding: 40px; text-align: center; }
+
+/* GRID SYSTEM */
+.event-grid, .item-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 25px; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+/* CARDS */
+.card, .item-card { 
+    background: var(--panel); 
+    border-radius: 15px; 
+    overflow: hidden; 
+    border: 1px solid #333; 
+    transition: transform 0.3s, border-color 0.3s; 
+    cursor: pointer;
+}
+
+.card:hover, .item-card:hover { 
+    border-color: var(--accent); 
+    transform: translateY(-8px); 
+}
+
+/* IMAGE STYLING FOR BOTH HOME AND PACKAGES */
+.card img, .item-card img { 
+    width: 100%; 
+    height: 180px; 
+    object-fit: cover; 
+    display: block;
+}
+
+.card-text, .item-info { padding: 15px; }
+.card-text h3 { margin: 10px 0; color: #fff; }
+
+/* FORMS */
+.form-box { max-width: 320px; margin: auto; background: var(--panel); padding: 35px; border-radius: 15px; border: 1px solid #222; }
+input { width: 100%; padding: 12px; margin: 10px 0; background: #222; color: white; border: 1px solid #444; border-radius: 5px; box-sizing: border-box; }
+button { background: var(--accent); border: none; padding: 12px 24px; cursor: pointer; font-weight: bold; border-radius: 5px; color: #000; text-transform: uppercase; }
+
+/* ADMIN */
+.stats-bar { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
+.stat-card { background: var(--accent); color: black; padding: 20px; border-radius: 10px; min-width: 150px; }
+table { width: 95%; margin: 20px auto; border-collapse: collapse; background: #0a0a0a; }
+th { border-bottom: 2px solid var(--accent); padding: 15px; color: var(--accent); }
+td { padding: 12px; border-bottom: 1px solid #222; }
