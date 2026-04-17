@@ -245,6 +245,3 @@ async function logout() {
 // Default state
 window.onload = () => showSection('home');
 
-app.post('/api/admin/create-booking', ...)
-app.put('/api/admin/update-booking/:id', ...)
-app.delete('/api/admin/delete-booking/:id', ...)
