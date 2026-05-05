@@ -16,7 +16,7 @@ function updateUI() {
         navAuth.classList.add('hidden');
         navUser.classList.remove('hidden');
         document.getElementById('user-display').innerText = `Hello, ${currentUser.username} | `;
-        
+
         if (currentUser.role === 'admin') {
             adminBtn.classList.remove('hidden');
             myBookingsBtn.classList.add('hidden');
@@ -54,9 +54,9 @@ async function handleRegister() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     });
-    if (res.ok) { 
-        alert("Registration Success! You can now login."); 
-        showSection('login'); 
+    if (res.ok) {
+        alert("Registration Success! You can now login.");
+        showSection('login');
     } else {
         const data = await res.json();
         alert(data.error);
@@ -68,7 +68,10 @@ async function loadCategory(cat) {
     const items = await res.json();
     const container = document.getElementById('items-container');
     document.getElementById('category-title').innerText = `${cat} Options`;
-    
+
+    // Get today's date as min value for date picker
+    const today = new Date().toISOString().split('T')[0];
+
     container.innerHTML = items.map(item => `
         <div class="item-card">
             <div class="item-info">
@@ -76,8 +79,16 @@ async function loadCategory(cat) {
                 <p style="font-size: 0.9rem; color: #ccc; min-height: 50px;">${item.description}</p>
                 <p style="color: var(--accent); font-weight: bold; font-size: 1.2rem;">₱${item.price.toLocaleString()}</p>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
-                <label style="font-size: 0.8rem; display: block; margin-bottom: 5px;">Select Event Date:</label>
-                <input type="date" id="date-${item._id}">
+
+                <label class="field-label">Select Event Date:</label>
+                <input type="date" id="date-${item._id}" min="${today}">
+
+                <label class="field-label">📞 Contact Number:</label>
+                <input type="tel" id="phone-${item._id}" placeholder="e.g. 09171234567" maxlength="15">
+
+                <label class="field-label">📍 Event Address:</label>
+                <input type="text" id="address-${item._id}" placeholder="e.g. Barangay San Jose, Imus, Cavite">
+
                 <button style="width: 100%; margin-top: 10px;" onclick="bookItem('${item._id}', '${item.name}')">Book Now</button>
             </div>
         </div>`).join('');
@@ -86,26 +97,40 @@ async function loadCategory(cat) {
 
 async function bookItem(mongoId, itemName) {
     if (!currentUser) return alert("Please login first!");
-    const dateInput = document.getElementById(`date-${mongoId}`);
-    const date = dateInput.value;
-    
-    if (!date) return alert("Please select a date for your event.");
 
-    // FEATURE: Confirmation Prompt
-    const confirmBooking = confirm(`Are you sure you want to rent "${itemName}" for ${date}?`);
+    const dateInput = document.getElementById(`date-${mongoId}`);
+    const phoneInput = document.getElementById(`phone-${mongoId}`);
+    const addressInput = document.getElementById(`address-${mongoId}`);
+
+    const date = dateInput.value;
+    const phone = phoneInput.value.trim();
+    const address = addressInput.value.trim();
+
+    // Validation
+    if (!date) return alert("Please select a date for your event.");
+    if (!phone) return alert("Please enter your contact number.");
+    if (!address) return alert("Please enter the event address.");
+
+    // Basic phone format check (at least 7 digits)
+    if (!/^\+?[\d\s\-]{7,15}$/.test(phone)) return alert("Please enter a valid phone number.");
+
+    const confirmBooking = confirm(`Are you sure you want to rent "${itemName}" for ${date}?\n📞 Contact: ${phone}\n📍 Address: ${address}`);
     if (!confirmBooking) return;
 
     const res = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: mongoId, date: date })
+        body: JSON.stringify({ item_id: mongoId, date, phone, address })
     });
 
     if (res.ok) {
         alert("Booking Successful! Our team will contact you soon.");
-        dateInput.value = ""; 
+        dateInput.value = "";
+        phoneInput.value = "";
+        addressInput.value = "";
     } else {
-        alert("Booking failed. Please try again.");
+        const data = await res.json();
+        alert(data.error || "Booking failed. Please try again.");
     }
 }
 
@@ -114,16 +139,18 @@ async function loadUserBookings() {
     const bookings = await res.json();
     let total = 0;
     const list = document.getElementById('user-booking-list');
-    
+
     if (bookings.length === 0) {
         list.innerHTML = "<p>You have no bookings yet.</p>";
     } else {
         list.innerHTML = bookings.map(b => {
             total += b.price;
-            return `<div class="card" style="margin-bottom:10px; padding: 15px; text-align: left; border-left: 4px solid var(--accent);">
+            return `<div class="booking-card">
                         <strong>${b.name}</strong><br>
-                        <span style="color: #ccc;">Event Date: ${b.booking_date}</span><br>
-                        <span style="color: var(--accent);">Amount: ₱${b.price.toLocaleString()}</span>
+                        <span class="booking-meta">📅 Event Date: ${b.booking_date}</span><br>
+                        <span class="booking-meta">📞 Contact: ${b.phone || 'N/A'}</span><br>
+                        <span class="booking-meta">📍 Address: ${b.address || 'N/A'}</span><br>
+                        <span class="booking-price">₱${b.price.toLocaleString()}</span>
                     </div>`;
         }).join('');
     }
@@ -131,7 +158,6 @@ async function loadUserBookings() {
     showSection('my-bookings');
 }
 
-// FIXED: Admin Load Data
 async function loadAdminData() {
     const sRes = await fetch('/api/admin/stats');
     const stats = await sRes.json();
@@ -140,13 +166,15 @@ async function loadAdminData() {
 
     const bRes = await fetch('/api/admin/all-bookings');
     const bookings = await bRes.json();
-    
+
     document.getElementById('admin-body').innerHTML = bookings.map(b => `
         <tr>
             <td>${b.username}</td>
             <td>${b.name}</td>
             <td>${b.booking_date}</td>
             <td>₱${b.price.toLocaleString()}</td>
+            <td>${b.phone}</td>
+            <td>${b.address}</td>
             <td>
                 <button onclick="cancelBooking('${b.id}')" style="background: #ff4444; padding: 8px 12px; font-size: 0.7rem; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     DELETE
@@ -156,17 +184,16 @@ async function loadAdminData() {
     showSection('admin-panel');
 }
 
-// FIXED: Admin Delete Function
 async function cancelBooking(id) {
     if (!confirm("Are you sure you want to delete this booking?")) return;
-    
+
     const res = await fetch(`/api/admin/booking/${id}`, {
         method: 'DELETE'
     });
 
     if (res.ok) {
         alert("Booking deleted.");
-        loadAdminData(); // Refresh listahan
+        loadAdminData();
     } else {
         alert("Error: Could not delete booking.");
     }
