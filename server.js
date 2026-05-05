@@ -17,7 +17,13 @@ mongoose.connect(mongoURI).then(() => {
 // Schemas
 const Item = mongoose.model('Item', new mongoose.Schema({ name: String, category: String, price: Number, description: String, image: String }));
 const User = mongoose.model('User', new mongoose.Schema({ username: { type: String, unique: true }, password: { type: String }, role: { type: String, default: 'user' } }));
-const Booking = mongoose.model('Booking', new mongoose.Schema({ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' }, booking_date: String }));
+const Booking = mongoose.model('Booking', new mongoose.Schema({
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
+    booking_date: String,
+    phone: { type: String, default: '' },       // NEW: client phone number
+    address: { type: String, default: '' }      // NEW: event address/location
+}));
 
 // Middleware
 app.use(bodyParser.json());
@@ -64,34 +70,56 @@ app.get('/api/items/:category', async (req, res) => {
     res.json(items);
 });
 
+// UPDATED: Accept phone and address when booking
 app.post('/api/book', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Login required" });
-    const newBooking = new Booking({ user: req.session.userId, item: req.body.item_id, booking_date: req.body.date });
+
+    const { item_id, date, phone, address } = req.body;
+
+    if (!phone || phone.trim() === '') return res.status(400).json({ error: "Phone number is required." });
+    if (!address || address.trim() === '') return res.status(400).json({ error: "Event address is required." });
+
+    const newBooking = new Booking({
+        user: req.session.userId,
+        item: item_id,
+        booking_date: date,
+        phone: phone.trim(),
+        address: address.trim()
+    });
     await newBooking.save();
     res.json({ success: true });
 });
 
+// UPDATED: Return phone and address in user bookings
 app.get('/api/my-bookings', async (req, res) => {
     if (!req.session.userId) return res.json([]);
     const bookings = await Booking.find({ user: req.session.userId }).populate('item');
-    res.json(bookings.map(b => ({ name: b.item?.name || "N/A", price: b.item?.price || 0, booking_date: b.booking_date })));
+    res.json(bookings.map(b => ({
+        name: b.item?.name || "N/A",
+        price: b.item?.price || 0,
+        booking_date: b.booking_date,
+        phone: b.phone || '',
+        address: b.address || ''
+    })));
 });
 
-// FIXED: Admin All Bookings (Ensuring ID is a string)
+// UPDATED: Return phone and address in admin all-bookings
 app.get('/api/admin/all-bookings', async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
     const bookings = await Booking.find().populate('user').populate('item');
     const formatted = bookings.map(b => ({
-        id: b._id.toString(), // CRITICAL: Convert to string
+        id: b._id.toString(),
         username: b.user ? b.user.username : "Unknown",
         name: b.item ? b.item.name : "Unknown",
         price: b.item ? b.item.price : 0,
-        booking_date: b.booking_date
+        booking_date: b.booking_date,
+        phone: b.phone || 'N/A',
+        address: b.address || 'N/A'
     }));
     res.json(formatted);
 });
 
-// FIXED: Admin Delete Endpoint
+// Admin Delete Endpoint
 app.delete('/api/admin/booking/:id', async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).json({ error: "Unauthorized" });
     try {
