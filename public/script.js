@@ -96,6 +96,17 @@ async function loadCategory(cat) {
                 <input type="date" id="date-${item._id}" min="${today}">
                 <label class="field-label">📞 Contact Number:</label>
                 <input type="tel" id="phone-${item._id}" placeholder="e.g. 09171234567" maxlength="15">
+                <label class="field-label">⏱️ Event Duration:</label>
+                <select id="duration-${item._id}" class="duration-select">
+                    <option value="">-- Select Duration --</option>
+                    <option value="2 hours">2 Hours</option>
+                    <option value="4 hours">4 Hours</option>
+                    <option value="6 hours">6 Hours</option>
+                    <option value="8 hours">8 Hours (Full Day)</option>
+                    <option value="2 days">2 Days</option>
+                    <option value="3 days">3 Days</option>
+                    <option value="1 week">1 Week</option>
+                </select>
                 <label class="field-label">📍 Event Address:</label>
                 <input type="text" id="address-${item._id}" placeholder="e.g. Barangay San Jose, Imus, Cavite">
                 <button style="width: 100%; margin-top: 10px;" onclick="bookItem('${item._id}', '${item.name}')">Book Now</button>
@@ -109,23 +120,26 @@ async function bookItem(mongoId, itemName) {
     const dateInput = document.getElementById(`date-${mongoId}`);
     const phoneInput = document.getElementById(`phone-${mongoId}`);
     const addressInput = document.getElementById(`address-${mongoId}`);
+    const durationInput = document.getElementById(`duration-${mongoId}`);
 
     const date = dateInput.value;
     const phone = phoneInput.value.trim();
     const address = addressInput.value.trim();
+    const duration = durationInput.value;
 
     if (!date) return alert("Please select a date for your event.");
     if (!phone) return alert("Please enter your contact number.");
     if (!address) return alert("Please enter the event address.");
+    if (!duration) return alert("Please select the event duration.");
     if (!/^\+?[\d\s\-]{7,15}$/.test(phone)) return alert("Please enter a valid phone number.");
 
-    const confirmBooking = confirm(`Are you sure you want to rent "${itemName}" for ${date}?\n📞 Contact: ${phone}\n📍 Address: ${address}`);
+    const confirmBooking = confirm(`Are you sure you want to rent "${itemName}" for ${date}?\n📞 Contact: ${phone}\n📍 Address: ${address}\n⏱️ Duration: ${duration}`);
     if (!confirmBooking) return;
 
     const res = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: mongoId, date, phone, address })
+        body: JSON.stringify({ item_id: mongoId, date, phone, address, duration })
     });
 
     if (res.ok) {
@@ -133,6 +147,7 @@ async function bookItem(mongoId, itemName) {
         dateInput.value = "";
         phoneInput.value = "";
         addressInput.value = "";
+        durationInput.value = "";
     } else {
         const data = await res.json();
         alert(data.error || "Booking failed. Please try again.");
@@ -169,6 +184,7 @@ async function loadUserBookings() {
                         <span class="booking-meta">📅 Event Date: ${b.booking_date}</span><br>
                         <span class="booking-meta">📞 Contact: ${b.phone || 'N/A'}</span><br>
                         <span class="booking-meta">📍 Address: ${b.address || 'N/A'}</span><br>
+                        <span class="booking-meta">⏱️ Duration: ${b.duration || 'N/A'}</span><br>
                         <span class="booking-price">₱${b.price.toLocaleString()}</span>
                     </div>`;
         }).join('');
@@ -195,6 +211,7 @@ async function loadAdminData() {
             <td>₱${b.price.toLocaleString()}</td>
             <td>${b.phone}</td>
             <td>${b.address}</td>
+            <td>${b.duration}</td>
             <td>
                 <select class="status-select" onchange="updateStatus('${b.id}', this.value)">
                     <option value="pending"   ${b.status === 'pending'   ? 'selected' : ''}>⏳ Pending</option>
