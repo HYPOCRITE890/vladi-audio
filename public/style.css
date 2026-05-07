@@ -32,7 +32,6 @@ section { padding: 40px; text-align: center; }
     transform: translateY(-8px);
 }
 
-/* IMAGE STYLING */
 .card img, .item-card img {
     width: 100%;
     height: 180px;
@@ -43,7 +42,6 @@ section { padding: 40px; text-align: center; }
 .card-text, .item-info { padding: 15px; }
 .card-text h3 { margin: 10px 0; color: #fff; }
 
-/* FIELD LABELS inside item cards */
 .field-label {
     display: block;
     font-size: 0.78rem;
@@ -84,7 +82,7 @@ button {
 }
 button:hover { opacity: 0.85; }
 
-/* BOOKING CARDS (My Bookings section) */
+/* BOOKING CARDS */
 .booking-card {
     background: var(--panel);
     border-left: 4px solid var(--accent);
@@ -99,18 +97,44 @@ button:hover { opacity: 0.85; }
 .booking-meta { color: #ccc; font-size: 0.9rem; }
 .booking-price { color: var(--accent); font-weight: bold; font-size: 1rem; }
 
+/* ✅ FIX 2: Status badges for My Bookings */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-pending   { background: #f0a500; color: #000; }
+.badge-confirmed { background: #00c97a; color: #000; }
+.badge-cancelled { background: #ff4444; color: #fff; }
+
+/* ✅ FIX 2: Status dropdown for admin table */
+.status-select {
+    background: #1a1a1a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    width: 100%;
+}
+.status-select:focus { outline: none; border-color: var(--accent); }
+
 /* ADMIN */
 .stats-bar { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
 .stat-card { background: var(--accent); color: black; padding: 20px; border-radius: 10px; min-width: 150px; }
 
-/* Table wrapper for horizontal scroll on small screens */
 .table-wrapper { overflow-x: auto; }
 
 table { width: 95%; margin: 20px auto; border-collapse: collapse; background: #0a0a0a; min-width: 700px; }
 th { border-bottom: 2px solid var(--accent); padding: 15px; color: var(--accent); white-space: nowrap; }
 td { padding: 12px; border-bottom: 1px solid #222; font-size: 0.9rem; }
 
-/* MOBILE RESPONSIVE */
+/* MOBILE */
 @media (max-width: 600px) {
     nav { flex-direction: column; gap: 10px; padding: 15px; text-align: center; }
     nav h1 { font-size: 1rem; }
