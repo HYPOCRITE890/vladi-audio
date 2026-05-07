@@ -112,6 +112,19 @@ button:hover { opacity: 0.85; }
 .badge-cancelled { background: #ff4444; color: #fff; }
 
 /* ✅ FIX 2: Status dropdown for admin table */
+.duration-select {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+.duration-select:focus { outline: none; border-color: var(--accent); }
+
 .status-select {
     background: #1a1a1a;
     color: white;
