@@ -31,7 +31,8 @@ const Booking = mongoose.model('Booking', new mongoose.Schema({
     booking_date: String,
     phone: { type: String, default: '' },
     address: { type: String, default: '' },
-    status: { type: String, default: 'pending', enum: ['pending', 'confirmed', 'cancelled'] }
+    status: { type: String, default: 'pending', enum: ['pending', 'confirmed', 'cancelled'] },
+    duration: { type: String, default: '' }
 }));
 
 // Middleware
@@ -88,15 +89,17 @@ app.get('/api/items/:category', async (req, res) => {
 
 app.post('/api/book', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Login required" });
-    const { item_id, date, phone, address } = req.body;
+    const { item_id, date, phone, address, duration } = req.body;
     if (!phone || phone.trim() === '') return res.status(400).json({ error: "Phone number is required." });
-    if (!address || address.trim() === '') return res.status(400).json({ error: "Event address is required." });
+    if (!address || address.trim() === '') return res.status(400).json({ error: 'Event address is required.' });
+    if (!duration || duration.trim() === '') return res.status(400).json({ error: 'Event duration is required.' });
     const newBooking = new Booking({
         user: req.session.userId,
         item: item_id,
         booking_date: date,
         phone: phone.trim(),
         address: address.trim(),
+        duration: duration.trim(),
         status: 'pending'
     });
     await newBooking.save();
@@ -113,6 +116,7 @@ app.get('/api/my-bookings', async (req, res) => {
         booking_date: b.booking_date,
         phone: b.phone || '',
         address: b.address || '',
+        duration: b.duration || 'N/A',
         status: b.status || 'pending'
     })));
 });
@@ -129,6 +133,7 @@ app.get('/api/admin/all-bookings', async (req, res) => {
         booking_date: b.booking_date,
         phone: b.phone || 'N/A',
         address: b.address || 'N/A',
+        duration: b.duration || 'N/A',
         status: b.status || 'pending'
     }));
     res.json(formatted);
