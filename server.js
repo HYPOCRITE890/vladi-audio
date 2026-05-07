@@ -15,14 +15,23 @@ mongoose.connect(mongoURI).then(() => {
 });
 
 // Schemas
-const Item = mongoose.model('Item', new mongoose.Schema({ name: String, category: String, price: Number, description: String, image: String }));
-const User = mongoose.model('User', new mongoose.Schema({ username: { type: String, unique: true }, password: { type: String }, role: { type: String, default: 'user' } }));
+const Item = mongoose.model('Item', new mongoose.Schema({
+    name: String, category: String, price: Number, description: String, image: String
+}));
+
+const User = mongoose.model('User', new mongoose.Schema({
+    username: { type: String, unique: true },
+    password: { type: String },
+    role: { type: String, default: 'user' }
+}));
+
 const Booking = mongoose.model('Booking', new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
     booking_date: String,
-    phone: { type: String, default: '' },       // NEW: client phone number
-    address: { type: String, default: '' }      // NEW: event address/location
+    phone: { type: String, default: '' },
+    address: { type: String, default: '' },
+    status: { type: String, default: 'pending', enum: ['pending', 'confirmed', 'cancelled'] }
 }));
 
 // Middleware
@@ -30,7 +39,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use(session({ secret: 'vladi-secret', resave: false, saveUninitialized: true }));
 
-// Seeding (Initial data)
+// Seeding
 async function seedDB() {
     const count = await Item.countDocuments();
     if (count === 0) {
@@ -46,7 +55,14 @@ async function seedDB() {
     }
 }
 
-// API Routes
+// ✅ FIX 1: Restore session after page refresh
+app.get('/api/me', async (req, res) => {
+    if (!req.session.userId) return res.json({ loggedIn: false });
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.json({ loggedIn: false });
+    res.json({ loggedIn: true, username: user.username, role: user.role });
+});
+
 app.post('/api/register', async (req, res) => {
     try {
         const hash = bcrypt.hashSync(req.body.password, 10);
@@ -70,27 +86,24 @@ app.get('/api/items/:category', async (req, res) => {
     res.json(items);
 });
 
-// UPDATED: Accept phone and address when booking
 app.post('/api/book', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Login required" });
-
     const { item_id, date, phone, address } = req.body;
-
     if (!phone || phone.trim() === '') return res.status(400).json({ error: "Phone number is required." });
     if (!address || address.trim() === '') return res.status(400).json({ error: "Event address is required." });
-
     const newBooking = new Booking({
         user: req.session.userId,
         item: item_id,
         booking_date: date,
         phone: phone.trim(),
-        address: address.trim()
+        address: address.trim(),
+        status: 'pending'
     });
     await newBooking.save();
     res.json({ success: true });
 });
 
-// UPDATED: Return phone and address in user bookings
+// ✅ FIX 2: Include status in user bookings response
 app.get('/api/my-bookings', async (req, res) => {
     if (!req.session.userId) return res.json([]);
     const bookings = await Booking.find({ user: req.session.userId }).populate('item');
@@ -99,11 +112,12 @@ app.get('/api/my-bookings', async (req, res) => {
         price: b.item?.price || 0,
         booking_date: b.booking_date,
         phone: b.phone || '',
-        address: b.address || ''
+        address: b.address || '',
+        status: b.status || 'pending'
     })));
 });
 
-// UPDATED: Return phone and address in admin all-bookings
+// ✅ FIX 2: Include status in admin bookings response
 app.get('/api/admin/all-bookings', async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).send("Unauthorized");
     const bookings = await Booking.find().populate('user').populate('item');
@@ -114,12 +128,27 @@ app.get('/api/admin/all-bookings', async (req, res) => {
         price: b.item ? b.item.price : 0,
         booking_date: b.booking_date,
         phone: b.phone || 'N/A',
-        address: b.address || 'N/A'
+        address: b.address || 'N/A',
+        status: b.status || 'pending'
     }));
     res.json(formatted);
 });
 
-// Admin Delete Endpoint
+// ✅ FIX 2: Admin update booking status endpoint
+app.patch('/api/admin/booking/:id/status', async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).json({ error: "Unauthorized" });
+    const { status } = req.body;
+    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+    }
+    try {
+        await Booking.findByIdAndUpdate(req.params.id, { status });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update status" });
+    }
+});
+
 app.delete('/api/admin/booking/:id', async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).json({ error: "Unauthorized" });
     try {
