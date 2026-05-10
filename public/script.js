@@ -238,6 +238,23 @@ async function updateStatus(id, status) {
     if (!res.ok) alert("Failed to update status.");
 }
 
+
+// RESET: Remove all clients and their bookings
+async function resetClients() {
+    const confirmed = confirm('⚠️ WARNING: This will permanently delete ALL clients and their bookings. This cannot be undone. Are you sure?');
+    if (!confirmed) return;
+
+    const doubleCheck = confirm('Are you absolutely sure? All client accounts and booking records will be erased.');
+    if (!doubleCheck) return;
+
+    const res = await fetch('/api/admin/reset-clients', { method: 'DELETE' });
+    if (res.ok) {
+        alert('✅ All clients and their bookings have been removed.');
+        loadAdminData(); // refresh the dashboard
+    } else {
+        alert('❌ Failed to reset clients. Please try again.');
+    }
+}
 async function cancelBooking(id) {
     if (!confirm("Are you sure you want to delete this booking?")) return;
     const res = await fetch(`/api/admin/booking/${id}`, { method: 'DELETE' });
