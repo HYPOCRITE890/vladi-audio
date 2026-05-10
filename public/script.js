@@ -60,9 +60,33 @@ async function handleLogin() {
     } else alert(data.error);
 }
 
+// Live password match checker
+function checkPasswordMatch() {
+    const pass = document.getElementById('r-pass').value;
+    const confirm = document.getElementById('r-pass-confirm').value;
+    const msg = document.getElementById('pass-match-msg');
+    if (confirm === '') {
+        msg.textContent = '';
+        msg.className = 'pass-msg';
+    } else if (pass === confirm) {
+        msg.textContent = '✅ Passwords match!';
+        msg.className = 'pass-msg pass-ok';
+    } else {
+        msg.textContent = '❌ Passwords do not match.';
+        msg.className = 'pass-msg pass-err';
+    }
+}
+
 async function handleRegister() {
     const username = document.getElementById('r-user').value;
     const password = document.getElementById('r-pass').value;
+    const confirm = document.getElementById('r-pass-confirm').value;
+
+    if (!username.trim()) return alert('Please enter a username.');
+    if (!password) return alert('Please enter a password.');
+    if (password.length < 6) return alert('Password must be at least 6 characters.');
+    if (password !== confirm) return alert('Passwords do not match. Please re-enter.');
+
     const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,6 +94,10 @@ async function handleRegister() {
     });
     if (res.ok) {
         alert("Registration Success! You can now login.");
+        document.getElementById('r-user').value = '';
+        document.getElementById('r-pass').value = '';
+        document.getElementById('r-pass-confirm').value = '';
+        document.getElementById('pass-match-msg').textContent = '';
         showSection('login');
     } else {
         const data = await res.json();
