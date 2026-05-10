@@ -171,6 +171,21 @@ app.get('/api/admin/stats', async (req, res) => {
     res.json({ totalClients: clients, totalBookings: bookings });
 });
 
+
+// RESET: Delete all non-admin users and their bookings
+app.delete('/api/admin/reset-clients', async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+    try {
+        const users = await User.find({ role: 'user' });
+        const userIds = users.map(u => u._id);
+        await Booking.deleteMany({ user: { $in: userIds } });
+        await User.deleteMany({ role: 'user' });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to reset clients' });
+    }
+});
+
 app.get('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true });
