@@ -71,12 +71,17 @@
             <h2>Register</h2>
             <input type="text" id="r-user" placeholder="Username">
             <input type="password" id="r-pass" placeholder="Password">
+            <input type="password" id="r-pass-confirm" placeholder="Confirm Password" oninput="checkPasswordMatch()">
+            <p id="pass-match-msg" class="pass-msg"></p>
             <button onclick="handleRegister()">Create Account</button>
         </div>
     </section>
 
     <section id="my-bookings" class="hidden">
-        <h2>Your Bookings</h2>
+        <div class="back-bar">
+            <button class="back-btn" onclick="showSection('home')">&larr; Back to Home</button>
+            <h2>Your Bookings</h2>
+        </div>
         <div id="user-booking-list"></div>
         <h3 id="user-total"></h3>
     </section>
